@@ -1,6 +1,6 @@
 # fpga-rc
-[Demo1](https://youtu.be/jwrR7UE4-a4)<br>
-[Demo2](https://youtu.be/0usVB3tZH2E)<br>
+[Youtube Demo1](https://youtu.be/jwrR7UE4-a4)<br>
+[Youtube Demo2](https://youtu.be/0usVB3tZH2E)<br>
 
 This is RC Car working with PlayStation gamepad.
 
