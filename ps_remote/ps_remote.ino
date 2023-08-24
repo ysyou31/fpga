@@ -1,4 +1,4 @@
-//#define FPGA
+#define FPGA
 
 #include <Ps3Controller.h>
 #include "util.h"
@@ -7,7 +7,7 @@
 //#define DEBUG2 // show transmit buffer
 
 
-#define RF Serial1
+#define RF Serial1   // RF Transceiver use predefined Serial1
 uint8_t defPadBuf[] = {0xFF, 0xFF, 0x0, 0x0, 0x64, 0x0, 0x0, 0x64, 0x0, 0x0, 0xC8}; // all sticks middle, no button pressed.
 
 void getPS3data();
@@ -46,9 +46,9 @@ void loop()
     }else{
       memncpy(defPadBuf, pad.buf, FRAME_DATA_SIZE+3);
     }
-#ifdef FPGA  // FPGA에서는 0xff, 0xff, x-stick, accel, check_sum 으로 5byte로 줄여보냄. gamepad struct의 buffer를 수정해서 전송함.
-    pad.buf[2] = pad.data.lx; // zero zone 미리 적용되어서 0~199 range임.
-    pad.buf[3] = map(pad.data.r_trigger - pad.data.l_trigger, -255, 255, 0, 200); // zero zone없음. 눌린값 그대로 R-L trigger값을 0~199로 매핑하여 전송.
+#ifdef FPGA  // FPGA send just LX-Stick(1byte), r_trigger-l_trigger(1byte) total 2byte data. 
+    pad.buf[2] = pad.data.lx; 
+    pad.buf[3] = map(pad.data.r_trigger - pad.data.l_trigger, -255, 255, 1, 201); // not allow to be 0 to make checksum>1
     pad.buf[4] = pad.buf[2]+pad.buf[3]; // add checksum
     RF.write(pad.buf, 5);  // Transmitt
 #else
@@ -63,31 +63,31 @@ void getPS3data(){
   if(Ps3.isConnected()){
     if(abs(Ps3.data.analog.stick.lx)>24){ // left stick X(-128~128) map to range of 1~200. -25~25 is zero zone.
       if(Ps3.data.analog.stick.lx>0){
-        pad.data.lx=map(Ps3.data.analog.stick.lx, 25, 128, 101,200);
+        pad.data.lx=map(Ps3.data.analog.stick.lx, 25, 128, 102,201);
       }else{
-        pad.data.lx=map(Ps3.data.analog.stick.lx, -128, -25, 0,99);
+        pad.data.lx=map(Ps3.data.analog.stick.lx, -128, -25, 1,100); // not allow to be 0 to make checksum>1
       }
 #ifdef DEBUG1
       Serial.print("lx="); Serial.println(Ps3.data.analog.stick.lx, DEC);
 #endif
     }else
-      pad.data.lx=100; // 0~200
+      pad.data.lx=101; // 0~200
     
     if(abs(Ps3.data.analog.stick.rx)>24 || abs(Ps3.data.analog.stick.ry)>24){
       if(Ps3.data.analog.stick.rx>0){
-        pad.data.rx=map(Ps3.data.analog.stick.rx, 25, 128, 101,200);
+        pad.data.rx=map(Ps3.data.analog.stick.rx, 25, 128, 102,201);
       }else if(Ps3.data.analog.stick.rx<0){
-        pad.data.rx=map(Ps3.data.analog.stick.rx, -128, -25, 0,99);
+        pad.data.rx=map(Ps3.data.analog.stick.rx, -128, -25, 1,100);
       }else{
-        pad.data.rx=100;
+        pad.data.rx=101;
       }
       
       if(Ps3.data.analog.stick.ry>24){
-        pad.data.ry=map(Ps3.data.analog.stick.ry, 25, 128, 101,200);
+        pad.data.ry=map(Ps3.data.analog.stick.ry, 25, 128, 102,201);
       }else if(Ps3.data.analog.stick.rx<-24){
-        pad.data.ry=map(Ps3.data.analog.stick.ry, -128, -25, 0,99);
+        pad.data.ry=map(Ps3.data.analog.stick.ry, -128, -25, 1,100);
       }else{
-        pad.data.ry=100;
+        pad.data.ry=101;
       }
 
 #ifdef DEBUG1
