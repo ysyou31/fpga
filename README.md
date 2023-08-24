@@ -3,7 +3,7 @@
 [Youtube Demo2](https://youtu.be/0usVB3tZH2E)<br>
 
 MKRVIDOR4000.qpf   :  Quartus Prime project file (Intel FPGA Programming tool)<br>
-MKRVIDOR4000_top.v : main fpga module.<br>
+MKRVIDOR4000_top.v : main start module.<br>
 pwm.v   :  PWM generation module + Frame decoding module.<br>
 <br>
 <br>
